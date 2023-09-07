@@ -5,6 +5,10 @@ use crate::{expr::*, types::*};
 #[cfg(feature = "backend-postgres")]
 pub use crate::extension::postgres::{PgFunc, PgFunction};
 
+#[cfg(feature = "backend-bigquery")]
+pub use crate::extension::bigquery::BqFunction;
+
+
 /// Functions
 #[derive(Debug, Clone, PartialEq)]
 pub enum Function {
@@ -27,6 +31,8 @@ pub enum Function {
     Round,
     #[cfg(feature = "backend-postgres")]
     PgFunction(PgFunction),
+    #[cfg(feature = "backend-bigquery")]
+    BqFunction(BqFunction)
 }
 
 /// Function call.
@@ -37,7 +43,7 @@ pub struct FunctionCall {
 }
 
 impl FunctionCall {
-    pub(crate) fn new(func: Function) -> Self {
+    pub fn new(func: Function) -> Self {
         Self {
             func,
             args: Vec::new(),

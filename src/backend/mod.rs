@@ -11,6 +11,8 @@ mod postgres;
 #[cfg(feature = "backend-sqlite")]
 #[cfg_attr(docsrs, doc(cfg(feature = "backend-sqlite")))]
 mod sqlite;
+#[cfg(feature = "backend-bigquery")]
+mod bigquery;
 
 #[cfg(feature = "backend-mysql")]
 pub use mysql::*;
@@ -18,6 +20,8 @@ pub use mysql::*;
 pub use postgres::*;
 #[cfg(feature = "backend-sqlite")]
 pub use sqlite::*;
+#[cfg(feature = "backend-bigquery")]
+pub use bigquery::*;
 
 mod foreign_key_builder;
 mod index_builder;

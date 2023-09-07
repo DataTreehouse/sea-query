@@ -309,8 +309,7 @@ pub trait QueryBuilder:
                 }
             }
             SimpleExpr::FunctionCall(func) => {
-                self.prepare_function(&func.func, sql);
-                self.prepare_tuple(&func.args, sql);
+                self.prepare_function_call(func, sql);
             }
             SimpleExpr::Binary(left, op, right) => match (op, right.as_ref()) {
                 (BinOper::In, SimpleExpr::Tuple(t)) if t.is_empty() => {
@@ -384,7 +383,18 @@ pub trait QueryBuilder:
             SimpleExpr::Constant(val) => {
                 self.prepare_constant(val, sql);
             }
+            #[cfg(feature = "backend-bigquery")]
+            SimpleExpr::Struct(_) => unimplemented!(),
         }
+    }
+
+    fn prepare_function_call(&self, func:&FunctionCall, sql: &mut dyn SqlWriter) {
+        self.prepare_function_call_common(func, sql);
+    }
+
+    fn prepare_function_call_common(&self, func:&FunctionCall, sql: &mut dyn SqlWriter) {
+        self.prepare_function(&func.func, sql);
+        self.prepare_tuple(&func.args, sql);
     }
 
     /// Translate [`CaseStatement`] into SQL statement.
@@ -493,6 +503,10 @@ pub trait QueryBuilder:
 
     /// Translate [`TableRef`] into SQL statement.
     fn prepare_table_ref(&self, table_ref: &TableRef, sql: &mut dyn SqlWriter) {
+        self.prepare_table_ref_common(table_ref, sql);
+    }
+
+    fn prepare_table_ref_common(&self, table_ref: &TableRef, sql: &mut dyn SqlWriter) {
         match table_ref {
             TableRef::SubQuery(query, alias) => {
                 write!(sql, "(").unwrap();
@@ -672,6 +686,8 @@ pub trait QueryBuilder:
                     Function::Round => "ROUND",
                     #[cfg(feature = "backend-postgres")]
                     Function::PgFunction(_) => unimplemented!(),
+                    #[cfg(feature = "backend-bigquery")]
+                    Function::BqFunction(_) => unimplemented!(),
                 }
             )
             .unwrap();

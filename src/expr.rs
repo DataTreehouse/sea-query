@@ -35,6 +35,8 @@ pub enum SimpleExpr {
     AsEnum(DynIden, Box<SimpleExpr>),
     Case(Box<CaseStatement>),
     Constant(Value),
+    #[cfg(feature="backend-bigquery")]
+    Struct(Vec<NamedField>)
 }
 
 pub(crate) mod private {
@@ -68,6 +70,7 @@ pub(crate) mod private {
 }
 
 use private::Expression;
+use crate::extension::bigquery::NamedField;
 
 impl Expression for Expr {
     fn un_op(mut self, o: UnOper) -> SimpleExpr {
@@ -2499,3 +2502,4 @@ impl SimpleExpr {
         }
     }
 }
+

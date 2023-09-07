@@ -7,6 +7,8 @@ use std::{fmt, mem, ops};
 use crate::extension::postgres::PgBinOper;
 #[cfg(feature = "backend-sqlite")]
 use crate::extension::sqlite::SqliteBinOper;
+#[cfg(feature="backend-bigquery")]
+use crate::extension::bigquery::unnest::Unnest;
 #[cfg(not(feature = "thread-safe"))]
 pub use std::rc::Rc as RcOrArc;
 #[cfg(feature = "thread-safe")]
@@ -145,6 +147,9 @@ pub enum TableRef {
     ValuesList(Vec<ValueTuple>, DynIden),
     /// Function call with alias
     FunctionCall(FunctionCall, DynIden),
+    #[cfg(feature = "backend-bigquery")]
+    /// BigQuery Unnest
+    Unnest(Unnest, DynIden)
 }
 
 pub trait IntoTableRef {
@@ -536,6 +541,8 @@ impl TableRef {
             Self::SubQuery(statement, _) => Self::SubQuery(statement, alias.into_iden()),
             Self::ValuesList(values, _) => Self::ValuesList(values, alias.into_iden()),
             Self::FunctionCall(func, _) => Self::FunctionCall(func, alias.into_iden()),
+            #[cfg(feature = "backend-bigquery")]
+            Self::Unnest(unnest, _) => Self::Unnest(unnest, alias.into_iden()),
         }
     }
 }

@@ -45,6 +45,8 @@ pub trait TableRefBuilder: QuotedBuilder {
             | TableRef::FunctionCall(_, _) => {
                 panic!("TableRef with values is not support")
             }
+            #[cfg(feature = "backend-bigquery")]
+            TableRef::Unnest(_,_) => unimplemented!(),
         }
     }
 }
