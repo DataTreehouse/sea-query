@@ -47,13 +47,16 @@ impl QueryBuilder for BigQueryQueryBuilder {
 
     fn prepare_table_ref(&self, table_ref: &TableRef, sql: &mut dyn SqlWriter) {
         if let TableRef::Unnest(unnest, alias) = table_ref {
-            write!(sql, "UNNEST ").unwrap();
+            write!(sql, "UNNEST(").unwrap();
             write!(sql, "[").unwrap();
-            for se in &unnest.array_expression {
+            for (i,se) in unnest.array_expression.iter().enumerate() {
                 self.prepare_simple_expr(se, sql);
+                if i != unnest.array_expression.len() -1 {
+                    write!(sql, ",").unwrap();
+                }
             }
             let quote = self.quote();
-            write!(sql,"] AS {}{}{}", quote.0, alias.to_string(), quote.1 ).unwrap();
+            write!(sql,"]) AS {}{}{}", quote.left(), alias.to_string(), quote.right()).unwrap();
         } else {
             self.prepare_table_ref_common(table_ref, sql);
         }
