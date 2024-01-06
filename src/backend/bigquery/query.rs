@@ -24,6 +24,19 @@ impl QueryBuilder for BigQueryQueryBuilder {
 
     fn prepare_simple_expr(&self, simple_expr: &SimpleExpr, sql: &mut dyn SqlWriter) {
         match simple_expr {
+            SimpleExpr::Value(v) => {
+                match v {
+                    #[cfg(feature = "with-chrono")]
+                    Value::ChronoDateTimeUtc(c) => {
+                        if let Some(c) = c {
+                            write!(sql, "{}", c.format("%F %T%:z")).unwrap()
+                        } else {
+                            write!(sql, "NULL").unwrap()
+                        }
+                    }
+                    _ => self.prepare_simple_expr_common(simple_expr, sql)
+                }
+            }
             SimpleExpr::AsEnum(type_name, expr) => {
                 let simple_expr = expr.clone().cast_as(SeaRc::clone(type_name));
                 self.prepare_simple_expr_common(&simple_expr, sql);
