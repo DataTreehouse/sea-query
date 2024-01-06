@@ -29,8 +29,9 @@ impl QueryBuilder for BigQueryQueryBuilder {
                     #[cfg(feature = "with-chrono")]
                     Value::ChronoDateTimeUtc(c) => {
                         if let Some(c) = c {
-                            let q = self.quote();
-                            write!(sql, "{}{}{}", q.left(), c.format("%F %T%:z"), q.right()).unwrap()
+                            let mut out_string = "".to_string();
+                            self.write_string_quoted(&c.format("%F %T%:z").to_string(), &mut out_string);
+                            write!(sql, "{}", out_string).unwrap()
                         } else {
                             write!(sql, "NULL").unwrap()
                         }
