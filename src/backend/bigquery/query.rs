@@ -30,7 +30,7 @@ impl QueryBuilder for BigQueryQueryBuilder {
                     Value::ChronoDateTimeUtc(c) => {
                         if let Some(c) = c {
                             let q = self.quote();
-                            write!(sql, "{}{}{}", q.0, c.format("%F %T%:z"), q.1).unwrap()
+                            write!(sql, "{}{}{}", q.left(), c.format("%F %T%:z"), q.right()).unwrap()
                         } else {
                             write!(sql, "NULL").unwrap()
                         }
